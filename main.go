@@ -266,12 +266,12 @@ func DrainCSV(join string) func(<-chan *podio.Item, io.WriteCloser) {
 // http://godoc.org/github.com/andreas/podio-go#Item
 func FormatField(field interface{}) string {
 	switch value := field.(type) {
-		/*
-	case *podio.Value:
-		return FormatField(*value)
-	case podio.Value:
-		return FormatField(value.Value)
-		*/
+	/*
+		case *podio.Value:
+			return FormatField(*value)
+		case podio.Value:
+			return FormatField(value.Value)
+	*/
 	case podio.Time:
 		return fmt.Sprint(value.UnixNano() / 1e6)
 	case *podio.Item:
@@ -280,21 +280,21 @@ func FormatField(field interface{}) string {
 		return fmt.Sprint(value)
 
 		/*
-	case *float64:
-		return FormatField(*value)
-	case float64:
-		if math.Trunc(value) == value {
-			return fmt.Sprintf("%.0f", value)
-		}
-		return fmt.Sprintf("%f", value)
+			case *float64:
+				return FormatField(*value)
+			case float64:
+				if math.Trunc(value) == value {
+					return fmt.Sprintf("%.0f", value)
+				}
+				return fmt.Sprintf("%f", value)
 		*/
 
 	case string, *string:
-		return strings.Map(func (r rune) rune {
+		return strings.Map(func(r rune) rune {
 			switch {
-			case r== ';':
+			case r == ';':
 				return '�'
-			case r== '\n':
+			case r == '\n':
 				return '␤'
 			default:
 				return r
@@ -310,22 +310,22 @@ func FormatField(field interface{}) string {
 
 		// Does it have .value?
 		if v, ok := value["value"]; ok {
-			return FormatField(v);
+			return FormatField(v)
 		}
 
 		// Does it have .text?
 		if v, ok := value["text"]; ok {
-			return FormatField(v);
+			return FormatField(v)
 		}
 
 		// Does it have .app? (= link to an application
 		if v, ok := value["app"]; ok {
-			return FormatField(v);
+			return FormatField(v)
 		}
 
 		// Timestamps has .start_time_utc
 		if v, ok := value["start_utc"]; ok {
-			return FormatField(v);
+			return FormatField(v)
 		}
 
 		//fmt.Println("GOT AN INTERFACE", value)
@@ -339,15 +339,14 @@ func FormatField(field interface{}) string {
 
 		return fmt.Sprintf("{%s}", strings.Join(keys, ", "))
 
-
 	case []interface{}:
 		var data = make([]string, len(value))
 
 		for i, val := range value {
-			data[i] = FormatField(val);
+			data[i] = FormatField(val)
 		}
 
-		return strings.Join(data, " / ");
+		return strings.Join(data, " / ")
 	default:
 		return fmt.Sprintf(`"%#v"`, value)
 	}
