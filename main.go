@@ -3,20 +3,20 @@ package main
 import (
 	"flag"
 	"fmt"
-	"os"
 	"io"
+	"os"
 	"sort"
-	"time"
 	"strings"
+	"time"
 
 	"github.com/andreas/podio-go"
 	"github.com/bgentry/speakeasy"
 )
 
 var (
-	orgName string
+	orgName   string
 	spaceName string
-	appName string
+	appName   string
 
 	username string
 
@@ -36,8 +36,8 @@ func main() {
 	flag.Parse()
 
 	password, err := speakeasy.FAsk(os.Stderr, fmt.Sprintf("Plese enter password for `%s`: ", username))
-	if (err != nil) {
-		fmt.Println("Error: ", err);
+	if err != nil {
+		fmt.Println("Error: ", err)
 		return
 	}
 
@@ -90,7 +90,7 @@ func main() {
 		}
 	}
 
-	if space.Id == 0{
+	if space.Id == 0 {
 		fmt.Println("Could not find workspace", spaceName)
 		return
 	}
@@ -125,9 +125,9 @@ func main() {
 	path := fmt.Sprintf("/item/app/%d/filter?fields=items.fields(files)", app.Id)
 	// Do provisional request to get total item count
 	err = client.RequestWithParams("POST", path, nil, map[string]interface{}{
-		"limit": 1,
+		"limit":  1,
 		"offset": 0,
-	}, &items);
+	}, &items)
 	if err != nil {
 		fmt.Println("Error fetching items /", err)
 		return
@@ -143,32 +143,34 @@ func main() {
 		// Loop until we have all items
 		// Caveat: If items are added/deleted while looping, we get into trouble
 		for fetchedItems < totalItems {
+			// Re-initialize list, as pointers get mangled otherwise
+			var newItems podio.ItemList
 			itemsToFetch := 500
 
-			if itemsToFetch > totalItems - fetchedItems {
+			if itemsToFetch > totalItems-fetchedItems {
 				itemsToFetch = totalItems - fetchedItems
 			}
 
 			err := client.RequestWithParams("POST", path, nil, map[string]interface{}{
-				"limit": itemsToFetch,
+				"limit":  itemsToFetch,
 				"offset": fetchedItems,
-			}, &items);
+			}, &newItems)
 
 			if err != nil {
 				fmt.Println("Error fetching items /", err)
 				return
 			}
 
-			fetchedItems += len(items.Items)
+			fetchedItems += len(newItems.Items)
 
-			for _, item := range items.Items {
+			for _, item := range newItems.Items {
 				data <- item
 				//fmt.Printf("Item: %+v\n\n", item)
 			}
 
 		}
 
-		close(data);
+		close(data)
 	}()
 
 	DrainCSV(";")(data, os.Stdout)
