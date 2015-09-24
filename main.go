@@ -215,7 +215,7 @@ func DrainCSV(join string) func(<-chan *podio.Item, io.WriteCloser) {
 		out.Write([]byte(join))
 		out.Write([]byte("unixtime"))
 		out.Write([]byte(join))
-		out.Write([]byte("name"))
+		out.Write([]byte("itemId"))
 		out.Write([]byte(join))
 		out.Write([]byte(strings.Join(sortedKeys, join)))
 		out.Write([]byte("\n"))
@@ -225,7 +225,7 @@ func DrainCSV(join string) func(<-chan *podio.Item, io.WriteCloser) {
 		for _, item := range data {
 			arr[0] = item.CreatedOn.Format(time.RFC3339Nano)
 			arr[1] = fmt.Sprint(item.CreatedOn.Unix())
-			arr[2] = ""
+			arr[2] = fmt.Sprint(item.Id)
 
 			for i, name := range sortedKeys {
 				arr[i+3] = ""
@@ -244,7 +244,7 @@ func DrainCSV(join string) func(<-chan *podio.Item, io.WriteCloser) {
 		for item := range in {
 			arr[0] = item.CreatedOn.Format(time.RFC3339Nano)
 			arr[1] = fmt.Sprint(item.CreatedOn.Unix())
-			arr[2] = ""
+			arr[2] = fmt.Sprint(item.Id)
 
 			for i, name := range sortedKeys {
 				arr[i+3] = ""
